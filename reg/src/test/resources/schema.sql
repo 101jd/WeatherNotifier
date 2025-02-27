@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS keys (
+    email VARCHAR(64) PRIMARY KEY,
+    uuid UUID
+);

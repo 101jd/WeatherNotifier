@@ -1,0 +1,25 @@
+server:
+  port: 8087
+spring:
+  application:
+    name: gateway
+  main:
+    web-application-type: reactive
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: not
+          uri: http://localhost:8083
+          predicates:
+            - Path=/not/**
+        - id: reg
+          uri: http://localhost:8081
+          predicates:
+            - Path=/reg/**
+        - id: rem
+          uri: http://localhost:8082
+          predicates:
+            - Path=/rem/**

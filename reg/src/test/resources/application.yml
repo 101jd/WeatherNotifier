@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: reg
+  main:
+    web-application-type: reactive
+  datasource:
+    url: jdbc:h2:mem:testregdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password: password
+server:
+  port: 8081

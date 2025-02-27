@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: not
+  main:
+    web-application-type: reactive
+  datasource:
+    url: jdbc:h2:mem:notdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password: password
+server:
+  port: 8083

@@ -1,0 +1,9 @@
+2025-02-03 18:13:26.336505+03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "KEYS" not found (this database is empty); SQL statement:
+INSERT INTO keys VALUES(?, ?) [42104-232]
+2025-02-03 18:15:31.445644+03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "KEYS" not found (this database is empty); SQL statement:
+MERGE INTO keys KEY (email) VALUES (?, ?) [42104-232]
+2025-02-03 18:17:12.106209+03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "KEYS" not found (this database is empty); SQL statement:
+MERGE INTO keys AS target USING (SELECT ? AS email, ? AS uuid) AS source ON target.email = source.email WHEN MATCHED THEN UPDATE SET target.uuid = source.uuid WHEN NOT MATCHED THEN INSERT (email, uuid) VALUES (source.email, source.uuid) [42104-232]

@@ -1,0 +1,14 @@
+spring:
+  config:
+    import: "access-key.properties"
+  application:
+    name: rem
+  main:
+    web-application-type: reactive
+  datasource:
+    url: jdbc:h2:mem:remdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+server:
+  port: 8082

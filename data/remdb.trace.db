@@ -1,0 +1,15 @@
+2025-02-04 21:23:25.086186+03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "CURRENT" not found (this database is empty); SQL statement:
+MERGE INTO current KEY(location) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) [42104-232]
+2025-02-04 21:27:43.937763+03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "CURRENT" not found (this database is empty); SQL statement:
+INSERT INTO current KEY(location) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) [42104-232]
+2025-02-04 21:28:20.051464+03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "CURRENT" not found (this database is empty); SQL statement:
+INSERT INTO current VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) [42104-232]
+2025-02-04 21:30:22.201191+03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "CURRENT" not found (this database is empty); SQL statement:
+MERGE INTO current KEY(location_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) [42104-232]
+2025-02-04 21:32:42.936291+03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "CURRENT" not found (this database is empty); SQL statement:
+MERGE INTO current KEY(location_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) [42104-232]
