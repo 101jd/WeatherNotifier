@@ -1,5 +1,6 @@
 package org._jd.conf;
 
+import org.slf4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
@@ -11,4 +12,5 @@ public class RestConfig {
     public RestClient.Builder builder(){
         return RestClient.builder();
     }
+
 }

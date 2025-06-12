@@ -1,3 +1,10 @@
+#application:
+#  kafka:
+#    topic:
+#      - "reg-data"
+#      - "weather-data"
+#      - "user-data"
+
 spring:
   config:
     import: "access-key.properties"

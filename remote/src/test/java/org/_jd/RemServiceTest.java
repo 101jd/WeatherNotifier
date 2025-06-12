@@ -1,11 +1,6 @@
 package org._jd;
 
-import org._jd.domain.requestsobj.NotifyParameter;
-import org._jd.domain.requestsobj.RemUser;
-import org._jd.domain.weatherobj.RemResponseObj;
-import org._jd.domain.weatherobj.inter.Notes;
-import org._jd.service.KeyProperties;
-import org._jd.service.RemoteService;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -15,17 +10,27 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import src.main.java.org.jd._jd.Remote;
+import src.main.java.org.jd._jd.domain.requestsobj.NotifyParameter;
+import src.main.java.org.jd._jd.domain.requestsobj.RemUser;
+import src.main.java.org.jd._jd.domain.weatherobj.DTO.WeatherError;
+import src.main.java.org.jd._jd.domain.weatherobj.RemResponseObj;
+import src.main.java.org.jd._jd.domain.weatherobj.inter.Notes;
+import src.main.java.org.jd._jd.service.KeyProperties;
+import src.main.java.org.jd._jd.service.RemoteService;
+
 
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.*;
 
+import static org.junit.Assert.*;
+import static src.main.java.org.jd._jd.domain.requestsobj.NotifyParameter.STORM;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = Remote.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import({WeatherDTO.class, RemResponseObj.class})
+@Import({WeatherError.class, RemResponseObj.class, NotifyParameter.class, RemUser.class})
 public class RemServiceTest {
 
 
@@ -50,7 +55,7 @@ public class RemServiceTest {
         user.setId(UUID.randomUUID());
         user.setCity("");
         user.setEmail("test@test.net");
-        user.setParameter(NotifyParameter.STORM);
+        user.setParameter(STORM);
 
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         HttpEntity<String> entity = new HttpEntity<>(headers);
@@ -73,7 +78,7 @@ public class RemServiceTest {
         user.setId(UUID.randomUUID());
         user.setCity("");
         user.setEmail("test@test.net");
-        user.setParameter(NotifyParameter.STORM);
+        user.setParameter(STORM);
 
         TestRestTemplate template = new TestRestTemplate();
         HttpHeaders headers = new HttpHeaders();

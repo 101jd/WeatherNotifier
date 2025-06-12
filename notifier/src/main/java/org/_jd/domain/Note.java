@@ -10,7 +10,8 @@ import org._jd.domain.inter.Notes;
 @NoArgsConstructor
 @Data
 public class Note {
-    @JsonProperty(value = "note", required = true)
+    private String email;
+//    @JsonProperty(value = "note", required = true)
     private String note;
 
 }

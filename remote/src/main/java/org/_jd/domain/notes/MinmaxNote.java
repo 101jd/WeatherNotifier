@@ -6,10 +6,10 @@ import org._jd.domain.weatherobj.inter.Notes;
 
 @Data
 @NoArgsConstructor
-public class MinmaxNote implements Notes {
-    private String note;
+public class MinmaxNote extends Note implements Notes {
 
-    public MinmaxNote(int difference, String direction, String city, String bound) {
+    public MinmaxNote(String email, int difference, String direction, String city, String bound) {
+        this.email = email;
         this.note = "There is " + difference + " dergeese " + direction + " in " + city + " than " + bound;
     }
 }

@@ -8,6 +8,6 @@ import java.util.UUID;
 public class RemUser {
     private UUID id;
     private String email;
-    private NotifyParameter parameter;
+    private org._jd.domain.requestsobj.NotifyParameter parameter;
     private String city;
 }

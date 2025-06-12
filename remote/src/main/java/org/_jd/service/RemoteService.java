@@ -43,15 +43,17 @@ public class RemoteService {
     Logger logger;
 
 
-    public RemResponseObj grabWeather(String city) {
+
+
+    public RemResponseObj grabWeather(RemUser user) {
 
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
-            RemResponseObj response = template.exchange(remote + city, HttpMethod.GET, entity, RemResponseObj.class).getBody();
-            logger.info("New weather object for " + response.getLocation().getName() + " recieved");
+            RemResponseObj response = template.exchange(remote + user.getCity(), HttpMethod.GET, entity, RemResponseObj.class).getBody();
+            logger.info(StringTemplate.STR."New weather object for \{response.getLocation().getName()} recieved");
 
 
             if (repo.getMinMax(response.getLocation().getName()) == null) {
@@ -61,13 +63,11 @@ public class RemoteService {
             } else {
                 if (response.getCurrent().getTemperature() > repo.getMaxTemperature(response.getLocation().getName())) {
                     repo.refreshMax(response.getLocation().getName(), response.getCurrent().getTemperature());
-                    logger.info("In " + response.getLocation().getName()
-                            + " max temp = " + response.getCurrent().getTemperature());
+                    logger.info(StringTemplate.STR."In \{response.getLocation().getName()} max temp = \{response.getCurrent().getTemperature()}");
                 } else if (response.getCurrent().getTemperature()
                         < repo.getMinTemperature(response.getLocation().getName())) {
                     repo.refreshMin(response.getLocation().getName(), response.getCurrent().getTemperature());
-                    logger.info("In " + response.getLocation().getName()
-                            + " min temp = " + response.getCurrent().getTemperature());
+                    logger.info(StringTemplate.STR."In \{response.getLocation().getName()} min temp = \{response.getCurrent().getTemperature()}");
                 }
             }
             return response;
@@ -79,7 +79,7 @@ public class RemoteService {
     }
 
     public Notes notice(RemUser user) {
-        RemResponseObj response = grabWeather(user.getCity());
+        RemResponseObj response = grabWeather(user);
         return notice(user, response);
     }
 
@@ -92,7 +92,7 @@ public class RemoteService {
                 switch (user.getParameter()) {
                     case STORM -> {
                         if (response.getCurrent().getWind_speed() > storm_index) {
-                            return new StormNote(
+                            return new StormNote(user.getEmail(),
                                     response.getCurrent().getWind_speed(), response.getLocation().getName()
                             );
 
@@ -102,7 +102,7 @@ public class RemoteService {
                         int diff = mod(response.getCurrent().getTemperature()
                                 - repo.getTemperature(response.getLocation().getName()));
                         if (diff >= tempdiff) {
-                            return new TempdiffNote(
+                            return new TempdiffNote(user.getEmail(),
                                     diff, response.getLocation().getName(),
                                     response.getCurrent().getTemperature());
                         }
@@ -115,19 +115,23 @@ public class RemoteService {
                         int diff;
                         if (current > max) {
                             diff = mod(current - max);
-                            return new MinmaxNote(diff, "more", response.getLocation().getName(), "MAX");
+                            return new org._jd.domain.notes.MinmaxNote(user.getEmail(),
+                                    diff, "more", response.getLocation().getName(), "MAX");
                         } else if (current < min) {
                             diff = mod(current - min);
-                            return new MinmaxNote(diff, "less", response.getLocation().getName(), "MIN");
+                            return new MinmaxNote(user.getEmail(),
+                                    diff, "less", response.getLocation().getName(), "MIN");
                         }
                     }
                 }
-            return new NoneNote(response.getLocation().getName());
-        } else return new NoteDTO();
+            return new NoneNote(user.getEmail(), response.getLocation().getName());
+        } else return new NoteDTO(user.getEmail());
 
     }
 
     private int mod(int val){
         return val > 0 ? val : val * -1;
     }
+
+
 }

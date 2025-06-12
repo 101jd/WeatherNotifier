@@ -1,20 +1,31 @@
 package org._jd.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org._jd.domain.Note;
 import org._jd.domain.NotRemResponse;
 import org._jd.domain.NotUser;
 import org._jd.repo.NotUserRepo;
+import org._jd.repo.NotesRepo;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+
 
 @Service
 public class NotifyService {
@@ -29,14 +40,22 @@ public class NotifyService {
     private NotUserRepo repo;
 
     @Autowired
-    private EmailExceptionHandler gateway;
+    private NotesRepo notesRepo;
+
+    @Autowired
+    private org._jd.service.MailGateway gateway;
 
     @Autowired
     Logger logger;
 
+    @Autowired
+    ObjectMapper mapper;
+
+    @Autowired
+    KafkaTemplate<Integer, NotUser> kafkaTemplate;
+
+
     private String REMOTE = "http://127.0.0.1:8087/rem";
-    private String GRAB = "/grab";
-    private String NOTICE = "/notify";
     private String PING = "/ping";
 
     public List<NotUser> getAllUsers(){
@@ -44,29 +63,27 @@ public class NotifyService {
     }
 
     public Boolean addUser(NotUser user){
-        logger.info("New user: " + user);
         return repo.addUser(user);
     }
 
-    public NotRemResponse grab(String city) {
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
-        HttpEntity<String> entity = new HttpEntity<>(headers);
+    public Boolean sendDataToRemote(NotUser user){
+        ProducerRecord<Integer, NotUser> record = new ProducerRecord<>(
+                "user-data", user.hashCode(), user
+        );
 
-        return template.exchange(REMOTE + GRAB + "?city=" + city, HttpMethod.GET, entity, NotRemResponse.class)
-                .getBody();
+        SendResult<Integer, NotUser> result = new SendResult<>(record, null);
 
+        CompletableFuture<SendResult<Integer, NotUser>> future = kafkaTemplate.send(record);
+        logger.info("send user-data: " + user.getCity());
+
+        return future.complete(result);
     }
 
+    @KafkaListener(topics = "weather-data", groupId = "all-data-group")
+    public Boolean listenWeather(Note payload){
 
-    public Note notice(NotUser user) {
-
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<NotUser> entity = new HttpEntity<>(user, headers);
-
-        return template.exchange(REMOTE + NOTICE, HttpMethod.POST, entity, Note.class).getBody();
+            return notesRepo.addNote(payload);
 
     }
 
@@ -81,18 +98,27 @@ public class NotifyService {
 
 
     @PostConstruct
-    @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.DAYS)
-    public void start(){
+    @Scheduled(fixedDelay = 10, timeUnit = TimeUnit.SECONDS)
+    public void start() throws org._jd.exceptions.EmailException {
 
         if (remoteIsUp()) {
+
+            for (NotUser user : getAllUsers()){
+                sendDataToRemote(user);
+            }
+
             logger.info("Sending messages...");
-            if (!getAllUsers().isEmpty())
-                for (NotUser user : getAllUsers()) {
-                    Note note = notice(user);
-                    if (!note.getNote().equals("ERROR") && !note.getNote().contains("no incidents"))
-                        gateway.sendEmail("info@localhost", user.getEmail(), "WEATHER", note.getNote());
-                }
+            for (Note note : notesRepo.getAllNotes()){
+                if (!note.getNote().equals("ERROR") && !note.getNote().contains("no incidents"))
+                        gateway.sendEmail("info@localhost", note.getEmail(), "WEATHER", note.getNote());
+            }
         } else logger.warning("REMOTE SERVICE IS DOWN");
+    }
+
+    public NotUser listenUser(NotUser user) throws JsonProcessingException {
+        repo.addUser(user);
+        logger.info("message recieved " + user);
+        return user;
     }
 
 }

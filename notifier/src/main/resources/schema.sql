@@ -4,3 +4,8 @@ CREATE TABLE IF NOT EXISTS users (
     parameter VARCHAR(16),
     city VARCHAR(25)
 );
+
+CREATE TABLE IF NOT EXISTS notes (
+    email VARCHAR(64) PRIMARY KEY,
+    note VARCHAR(128)
+);

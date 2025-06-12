@@ -3,17 +3,23 @@ package org._jd.service;
 import org._jd.domain.CheckKeys;
 import org._jd.domain.RegUser;
 import org._jd.repo.CheckRepo;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.protocol.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.kafka.core.KafkaAdmin;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
 @Service
@@ -23,6 +29,9 @@ public class RegService {
 
     @Autowired
     private RestTemplate template;
+
+    @Autowired
+    KafkaTemplate<Integer, RegUser> kafkaTemplate;
 
     @Autowired
     CheckRepo repo;
@@ -37,12 +46,17 @@ public class RegService {
 
     public Boolean addUser(RegUser user){
         if (noticeIsUp()) {
-            headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-            headers.setContentType(MediaType.APPLICATION_JSON);
 
-            HttpEntity<RegUser> entity = new HttpEntity<>(user, headers);
+            //region KAFKA
+            ProducerRecord<Integer, RegUser> record = new ProducerRecord<>(
+                    "reg-data", user.hashCode(), user
+            );
+            CompletableFuture<SendResult<Integer, RegUser>> future = kafkaTemplate.send(record);
+            logger.info(future.toString());
 
-            return template.exchange(NOTICE + ADD, HttpMethod.POST, entity, Boolean.class).getBody();
+            return  future.complete(new SendResult<>(record, null));
+            //endregion
+
         } else {
             logger.warning("NOTICE IS DOWN");
             return noticeIsUp();
@@ -58,6 +72,7 @@ public class RegService {
     }
 
     public CheckKeys addKey(String email){
+
         return repo.addKey(email);
     }
 

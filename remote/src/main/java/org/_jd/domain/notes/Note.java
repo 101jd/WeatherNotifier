@@ -9,5 +9,6 @@ import org._jd.domain.weatherobj.inter.Notes;
 @NoArgsConstructor
 @Data
 public class Note {
+    protected String email;
     protected String note;
 }
